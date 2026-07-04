@@ -398,6 +398,7 @@ export class DatabaseService {
     `);
 
     await this.createTables();
+    await this.runMigrations();
   }
 }
 
