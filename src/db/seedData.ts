@@ -141,6 +141,17 @@ export class SeedData {
         likesCount: 4,
         commentsCount: 4,
         createdAt: new Date('2024-11-03T10:30:00').toISOString(),
+        title: 'Homemade Carbonara',
+        cookTime: 25,
+        servings: 2,
+        ingredients: ['200g spaghetti', '100g pancetta or guanciale', '2 large eggs', '1 egg yolk', '50g pecorino romano, grated', 'Freshly ground black pepper', 'Salt'],
+        steps: [
+          'Bring a large pot of salted water to a boil and cook the spaghetti until al dente.',
+          'While the pasta cooks, fry the pancetta in a skillet over medium heat until crisp.',
+          'Whisk the eggs, egg yolk, and pecorino together in a bowl with plenty of black pepper.',
+          'Drain the pasta, reserving a cup of pasta water, then toss it with the pancetta off the heat.',
+          'Quickly stir in the egg mixture, adding pasta water as needed to form a creamy sauce. Serve immediately.',
+        ],
       },
       {
         id: 'post-2',
@@ -149,6 +160,17 @@ export class SeedData {
         likesCount: 4,
         commentsCount: 4,
         createdAt: new Date('2024-11-02T15:20:00').toISOString(),
+        title: 'Traditional Neapolitan Pizza',
+        cookTime: 4320,
+        servings: 4,
+        ingredients: ['500g 00 flour', '325ml water', '10g salt', '3g active dry yeast', 'San Marzano tomatoes', 'Fresh mozzarella', 'Fresh basil', 'Olive oil'],
+        steps: [
+          'Mix flour, water, salt, and yeast into a dough and knead until smooth.',
+          'Cover and let ferment in the refrigerator for 72 hours.',
+          'Divide the dough into balls and let rest at room temperature for 2 hours before shaping.',
+          'Stretch each ball into a round base and top with crushed tomatoes, mozzarella, and basil.',
+          'Bake in a very hot oven (or pizza oven) until the crust is charred and puffy, about 2-3 minutes.',
+        ],
       },
       {
         id: 'post-3',
@@ -157,6 +179,17 @@ export class SeedData {
         likesCount: 4,
         commentsCount: 3,
         createdAt: new Date('2024-11-01T09:15:00').toISOString(),
+        title: 'Buddha Bowl',
+        cookTime: 35,
+        servings: 2,
+        ingredients: ['1 cup quinoa', '1 can chickpeas', '1 avocado', '2 tbsp tahini', '1 lemon', 'Mixed greens', 'Olive oil', 'Salt and pepper'],
+        steps: [
+          'Cook the quinoa according to package instructions and set aside to cool slightly.',
+          'Toss the chickpeas with olive oil, salt, and pepper, then roast at 200°C until crisp, about 20 minutes.',
+          'Whisk tahini with lemon juice and a splash of water to make the dressing.',
+          'Assemble bowls with quinoa, mixed greens, roasted chickpeas, and sliced avocado.',
+          'Drizzle with tahini dressing and serve.',
+        ],
       },
       {
         id: 'post-4',
@@ -165,6 +198,17 @@ export class SeedData {
         likesCount: 4,
         commentsCount: 4,
         createdAt: new Date('2024-10-31T18:45:00').toISOString(),
+        title: 'Chocolate Lava Cake',
+        cookTime: 25,
+        servings: 4,
+        ingredients: ['100g dark chocolate', '100g butter', '2 eggs', '2 egg yolks', '50g sugar', '30g flour', 'Butter and cocoa for ramekins'],
+        steps: [
+          'Preheat the oven to 200°C and butter and cocoa-dust the ramekins.',
+          'Melt the chocolate and butter together until smooth.',
+          'Whisk the eggs, egg yolks, and sugar until pale, then fold in the melted chocolate.',
+          'Fold in the flour and pour the batter into the prepared ramekins.',
+          'Bake for 10-12 minutes until the edges are set but the center is still soft. Serve immediately.',
+        ],
       },
       {
         id: 'post-5',
@@ -173,6 +217,16 @@ export class SeedData {
         likesCount: 3,
         commentsCount: 2,
         createdAt: new Date('2024-10-30T08:00:00').toISOString(),
+        title: 'Fresh Croissants & Espresso',
+        cookTime: 20,
+        servings: 2,
+        ingredients: ['2 butter croissants', 'Double espresso shots', 'Milk (optional)', 'Jam or butter to serve'],
+        steps: [
+          'Warm the croissants in the oven at 160°C for 5-8 minutes until crisp.',
+          'Pull two shots of espresso, or brew as preferred.',
+          'Steam the milk if making a latte or cappuccino.',
+          'Serve the warm croissants alongside the espresso with jam or butter.',
+        ],
       },
       {
         id: 'post-6',
@@ -181,14 +235,37 @@ export class SeedData {
         likesCount: 2,
         commentsCount: 2,
         createdAt: new Date('2024-10-29T19:30:00').toISOString(),
+        title: 'Vegan Miso Ramen',
+        cookTime: 40,
+        servings: 2,
+        ingredients: ['2 portions ramen noodles', '3 tbsp miso paste', '4 cups vegetable broth', '200g firm tofu', 'Shiitake mushrooms', 'Bok choy', 'Green onions', 'Nori sheets'],
+        steps: [
+          'Press and cube the tofu, then pan-fry until golden on all sides.',
+          'Simmer the vegetable broth with shiitake mushrooms for 15 minutes.',
+          'Whisk the miso paste into the broth off the heat to keep its flavor bright.',
+          'Cook the ramen noodles separately according to package instructions.',
+          'Assemble bowls with noodles, broth, tofu, bok choy, green onions, and nori.',
+        ],
       },
     ];
 
     for (const post of posts) {
       await database.runAsync(
-        `INSERT OR REPLACE INTO posts (id, authorId, caption, likesCount, commentsCount, createdAt, isArchived, uploadStatus)
-         VALUES (?, ?, ?, ?, ?, ?, 0, 'uploaded')`,
-        [post.id, post.authorId, post.caption, post.likesCount, post.commentsCount, post.createdAt]
+        `INSERT OR REPLACE INTO posts (id, authorId, caption, likesCount, commentsCount, createdAt, isArchived, uploadStatus, title, cookTime, servings, ingredients, steps)
+         VALUES (?, ?, ?, ?, ?, ?, 0, 'uploaded', ?, ?, ?, ?, ?)`,
+        [
+          post.id,
+          post.authorId,
+          post.caption,
+          post.likesCount,
+          post.commentsCount,
+          post.createdAt,
+          post.title,
+          post.cookTime,
+          post.servings,
+          JSON.stringify(post.ingredients),
+          JSON.stringify(post.steps),
+        ]
       );
     }
 

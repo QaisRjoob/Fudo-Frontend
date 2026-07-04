@@ -28,7 +28,7 @@ export class AppInitializer {
 
       // Reseed when seed version changes
       const seededVersion = await StorageService.getItem('app_seed_version');
-      const CURRENT_SEED_VERSION = '5';
+      const CURRENT_SEED_VERSION = '6';
 
       if (seededVersion !== CURRENT_SEED_VERSION) {
         console.log('🌱 Seeding database (version', CURRENT_SEED_VERSION, ')...');
