@@ -46,7 +46,25 @@ export class AuthService {
   }
 
   static async isAuthenticated(): Promise<boolean> {
-    return currentAuthToken !== null && currentUserId !== null;
+    if (currentAuthToken === null || currentUserId === null) return false;
+
+    // The session id can outlive its user row (e.g. a database reseed wipes
+    // custom accounts while AsyncStorage keeps the old session). Treat a
+    // dangling session as logged out instead of showing empty screens.
+    const database = await this.db.getDatabase();
+    const result = await database.getFirstAsync<any>(
+      'SELECT id FROM users WHERE id = ?',
+      [currentUserId]
+    );
+
+    if (!result) {
+      currentAuthToken = null;
+      currentUserId = null;
+      await StorageService.removeItem(AuthService.SESSION_KEY);
+      return false;
+    }
+
+    return true;
   }
 
   static async getCurrentUser(): Promise<User | null> {
