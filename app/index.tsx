@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { AuthService } from '../src/services/AuthService';
-import DatabaseService from '../src/db/database';
-import SeedData from '../src/db/seedData';
 import { View, ActivityIndicator, Text } from 'react-native';
 
 export default function Index() {
@@ -14,20 +12,10 @@ export default function Index() {
   }, []);
 
   const checkAuth = async () => {
-    console.log('[Index] Starting app initialization...');
-    
-    // Initialize database
-    console.log('[Index] Initializing database...');
-    await DatabaseService.initializeDatabase();
-    
-    // Initialize sample data on first launch
-    console.log('[Index] Initializing sample users...');
-    await AuthService.initializeSampleData();
-    
-    // Seed database with posts, stories, etc.
-    console.log('[Index] Seeding database with posts and stories...');
-    await SeedData.seed();
-    console.log('[Index] Database seeded successfully!');
+    // Database setup and seeding already happened in AppInitializer (app/_layout.tsx)
+    // before this screen mounts. Re-seeding here regenerated random media ids on every
+    // launch, which could orphan a story's mediaId and break the stories row.
+    console.log('[Index] Checking auth...');
 
     const isAuthenticated = await AuthService.isAuthenticated();
     console.log('[Index] User authenticated:', isAuthenticated);

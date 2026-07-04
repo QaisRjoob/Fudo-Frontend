@@ -24,7 +24,7 @@ export class StoryRepository implements IStoryRepository {
   async getActiveStories(userId: string): Promise<Story[]> {
     const database = await this.db.getDatabase();
     const now = new Date().toISOString();
-    
+
     // Get stories from users the current user follows that haven't expired
     const results = await database.getAllAsync<any>(
       `SELECT DISTINCT s.* FROM stories s
@@ -34,7 +34,7 @@ export class StoryRepository implements IStoryRepository {
       [userId, now]
     );
 
-    return Promise.all(results.map(async (row) => await this.mapToStory(row)));
+    return this.mapToStories(results);
   }
 
   async getUserStories(userId: string): Promise<Story[]> {
@@ -44,7 +44,7 @@ export class StoryRepository implements IStoryRepository {
       [userId]
     );
 
-    return Promise.all(results.map(async (row) => await this.mapToStory(row)));
+    return this.mapToStories(results);
   }
 
   async getExpiredStories(userId: string): Promise<Story[]> {
@@ -54,7 +54,7 @@ export class StoryRepository implements IStoryRepository {
       'SELECT * FROM stories WHERE authorId = ? AND expiresAt IS NOT NULL AND expiresAt <= ? ORDER BY createdAt DESC',
       [userId, now]
     );
-    return Promise.all(results.map(async (row) => await this.mapToStory(row)));
+    return this.mapToStories(results);
   }
 
   async getStoryById(storyId: string): Promise<Story | null> {
@@ -153,9 +153,7 @@ export class StoryRepository implements IStoryRepository {
       [currentUserId, now, currentUserId, now]
     );
 
-    const storiesResolved: Story[] = await Promise.all(
-      rows.map((row: any) => this.mapToStory(row))
-    );
+    const storiesResolved: Story[] = await this.mapToStories(rows);
 
     // Group by authorId, current user first
     const groupMap = new Map<string, Story[]>();
@@ -258,24 +256,36 @@ export class StoryRepository implements IStoryRepository {
     await database.runAsync('DELETE FROM story_highlights WHERE id = ?', [highlightId]);
   }
 
-  private async mapToStory(row: any): Promise<Story> {
+  // Maps a batch of story rows, dropping any whose media row is missing (e.g. a dangling
+  // mediaId) instead of letting one bad row fail the whole batch.
+  private async mapToStories(rows: any[]): Promise<Story[]> {
+    const mapped = await Promise.all(rows.map((row) => this.mapToStory(row)));
+    return mapped.filter((story): story is Story => story !== null);
+  }
+
+  private async mapToStory(row: any): Promise<Story | null> {
     const database = await this.db.getDatabase();
-    
+
     // Get media item
     const mediaResult = await database.getFirstAsync<any>(
       'SELECT * FROM media WHERE id = ?',
       [row.mediaId]
     );
 
+    if (!mediaResult) {
+      console.warn(`[StoryRepository] Story ${row.id} references missing media ${row.mediaId}`);
+      return null;
+    }
+
     const media: MediaItem = {
-      id: mediaResult!.id,
-      type: mediaResult!.type,
-      remoteUri: mediaResult!.remoteUri,
-      localUri: mediaResult!.localUri,
-      thumbnailUri: mediaResult!.thumbnailUri,
+      id: mediaResult.id,
+      type: mediaResult.type,
+      remoteUri: mediaResult.remoteUri,
+      localUri: mediaResult.localUri,
+      thumbnailUri: mediaResult.thumbnailUri,
       order: 0,
-      width: mediaResult!.width,
-      height: mediaResult!.height,
+      width: mediaResult.width,
+      height: mediaResult.height,
     };
 
     return {
